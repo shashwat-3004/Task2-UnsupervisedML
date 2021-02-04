@@ -1,0 +1,103 @@
+---
+title: "Unsupervised ML"
+author: "Shashwat Patel"
+date: "04/02/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE,message = FALSE)
+```
+
+# Attaching the required packages
+
+```{r}
+library(tidyverse)
+library(factoextra)
+
+```
+
+# Read the data
+
+```{r}
+data<-read.csv("Iris.csv")
+head(data)
+```
+
+# Basic summary of the data. 
+
+```{r}
+summary(data)
+```
+
+### **Removing non-numeric categories from the data**
+
+```{r}
+species<-data$Species
+data<-data[,c(-1,-6)]
+head(iris)
+```
+
+### **Elbow method to find opimal value of k or number of clusters**
+
+- It can be clearly seen that optimal number of cluster is 3, as the value of Total Within sum of square remains neraly the same after k=3.
+
+```{r}
+fviz_nbclust(data,FUNcluster = kmeans,method="wss") 
+```
+
+# K-means clustering
+
+```{r}
+k_mean<-kmeans(x=data,centers=3,nstart = 25)
+k_mean
+```
+
+# Cluster Plot
+
+- This function uses principle componet analysis for dimensional reduction.
+
+```{r}
+fviz_cluster(k_mean,data=data)+ scale_fill_discrete(labels=c("Iris-Setosa","Iris-Versicolor","Iris-Virginica"))
+```
+
+### Adding cluster label to the dataset
+
+```{r}
+clustered_data<-data.frame(Species=species,Cluster_no=k_mean$cluster)
+head(clustered_data)
+```
+
+- Full data available now.
+ 
+```{r}
+full_data<-cbind(data,clustered_data)
+full_data$Cluster_no<-factor(full_data$Cluster_no)
+head(full_data)
+```
+
+# Centroid values
+
+```{r}
+centers<-k_mean$centers
+centers<-as.data.frame(centers)
+centers
+
+```
+
+# Plot containig the clusters as well  as the centroid positions.
+
+- The centroids are in black colour.
+
+
+
+```{r}
+full_data%>%ggplot()+geom_point(aes(x =SepalLengthCm,y=SepalWidthCm,colour=Cluster_no))+geom_text(aes(x=5,y=4),label="Iris-Setosa",size=3,colour="red")+
+                                                  geom_text(aes(x=5.5,y=2.5),label="Iris-virginica",colour="blue",size=3)+
+geom_text(aes(x=7,y=3.4),label="Iris-versicolor",colour="darkgreen",size=3)+
+geom_point(data=centers,aes(x=SepalLengthCm,y=SepalWidthCm))  
+```
+
+
+### This concludes the task-2
